@@ -1,11 +1,11 @@
-import CardHolder from "./CardHolder";
+import CardHolder ,{withPromoted}from "./CardHolder";
 import { useState, useEffect } from "react";
 import React from "react";
 import about from "./about";
 
 
 const Body = () => {
-    // const restaurantCardPromoted=withPromoted(CardHolder);
+    const RestaurantCardPromoted=withPromoted(CardHolder);
     const [ListOfRest, setListOfRest] = useState([]);
     const [SearchText,setSearchText]=useState("");
     useEffect(() => {
@@ -13,11 +13,14 @@ const Body = () => {
     }, []);
 
     const fetchData= async ()=>{
-        const data=await fetch("https://corsproxy.io/?https://www.swiggy.com/mapi/homepage/getCards?lat=22.71700&lng=75.83370");
+    try{const data=await fetch("https://corsproxy.io/?https://www.swiggy.com/mapi/homepage/getCards?lat=22.71700&lng=75.83370");
         const json=await data.json();
         console.log(json);
        setListOfRest(json.data.success.cards[1].gridWidget.gridElements.infoWithStyle.restaurants);
-        
+    }
+    catch(error){
+        console.error(error);
+    }
     };
     if(ListOfRest.length==0){
         return
@@ -45,11 +48,12 @@ const Body = () => {
             </div>
             <div className="flex flex-wrap justify-center">
                 {ListOfRest.map((res)=>
-                    <CardHolder key={res.info.id} resData={res}/>
-                )
-                };
+                    (res.info.promoted?
+                        (<RestaurantCardPromoted key={res.info.id} resData={res}/>):
+                        (<CardHolder key={res.info.id} resData={res}/>))
+                    
+                )}
             </div>
-
         </div>
     );
 };
